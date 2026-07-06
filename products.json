@@ -1,0 +1,104 @@
+{
+  "shop": {
+    "name": "ATLETT",
+    "tagline": "SPORT GEAR",
+    "telegram": "atlett.uz",
+    "telegram_url": "https://t.me/atlett_uz",
+    "instagram": "atlett_uz",
+    "instagram_url": "https://instagram.com/atlett_uz",
+    "currency": "сум"
+  },
+  "categories": [
+    { "id": "football", "name": "Футбол", "icon": "ball" },
+    { "id": "boots", "name": "Бутсы", "icon": "boot" },
+    { "id": "apparel", "name": "Одежда", "icon": "shirt" },
+    { "id": "gloves", "name": "Перчатки", "icon": "glove" },
+    { "id": "fitness", "name": "Фитнес", "icon": "dumbbell" }
+  ],
+  "products": [
+    {
+      "id": "p001",
+      "name": "Бутсы ATLETT Strike FG",
+      "category": "boots",
+      "price": 420000,
+      "old_price": 520000,
+      "badge": "ХИТ",
+      "images": ["assets/products/placeholder-boots.svg"],
+      "video": "",
+      "short_description": "Лёгкие бутсы для игры на натуральном газоне.",
+      "description": "Бутсы созданы для скорости и контроля мяча. Верх из прошитой синтетической кожи держит форму после сотен ударов, шипы FG рассчитаны на натуральный газон. Привозим напрямую из Китая, поэтому цена ниже, чем у аналогов известных брендов.",
+      "sizes": ["40", "41", "42", "43", "44", "45"],
+      "in_stock": true
+    },
+    {
+      "id": "p002",
+      "name": "Мяч футбольный ATLETT Match",
+      "category": "football",
+      "price": 180000,
+      "old_price": 0,
+      "badge": "",
+      "images": ["assets/products/placeholder-ball.svg"],
+      "video": "",
+      "short_description": "Матчевый мяч, размер 5, для игры на любом покрытии.",
+      "description": "Мяч сшит из 32 панелей с влагостойким покрытием — форма не теряется даже после дождя. Подходит для тренировок и любительских матчей. Комплектуется насосом.",
+      "sizes": [],
+      "in_stock": true
+    },
+    {
+      "id": "p003",
+      "name": "Футболка ATLETT Training",
+      "category": "apparel",
+      "price": 95000,
+      "old_price": 120000,
+      "badge": "СКИДКА",
+      "images": ["assets/products/placeholder-shirt.svg"],
+      "video": "",
+      "short_description": "Дышащая футболка из быстросохнущей ткани.",
+      "description": "Ткань с технологией отвода влаги держит тело сухим во время интенсивных тренировок. Свободный крой не сковывает движения. Есть в 4 цветах.",
+      "sizes": ["S", "M", "L", "XL", "XXL"],
+      "in_stock": true
+    },
+    {
+      "id": "p004",
+      "name": "Вратарские перчатки ATLETT Grip Pro",
+      "category": "gloves",
+      "price": 210000,
+      "old_price": 0,
+      "badge": "НОВИНКА",
+      "images": ["assets/products/placeholder-gloves.svg"],
+      "video": "",
+      "short_description": "Латексные перчатки с усиленным захватом.",
+      "description": "Латекс повышенной цепкости обеспечивает надёжный хват мяча в любую погоду. Жёсткая вставка на запястье фиксирует руку и снижает риск травм пальцев.",
+      "sizes": ["6", "7", "8", "9", "10"],
+      "in_stock": true
+    },
+    {
+      "id": "p005",
+      "name": "Гантели разборные ATLETT Power 20кг",
+      "category": "fitness",
+      "price": 650000,
+      "old_price": 0,
+      "badge": "",
+      "images": ["assets/products/placeholder-dumbbell.svg"],
+      "video": "",
+      "short_description": "Разборные гантели для домашних тренировок.",
+      "description": "Комплект из двух гантелей с набором дисков от 2 до 20 кг каждая. Прорезиненное покрытие защищает пол от повреждений и снижает шум при работе.",
+      "sizes": [],
+      "in_stock": true
+    },
+    {
+      "id": "p006",
+      "name": "Гетры ATLETT Classic",
+      "category": "football",
+      "price": 55000,
+      "old_price": 0,
+      "badge": "",
+      "images": ["assets/products/placeholder-ball.svg"],
+      "video": "",
+      "short_description": "Плотные гетры с защитой голени.",
+      "description": "Компрессионная посадка фиксирует щитки и не сползает во время игры. Плотная вязка держит форму после стирки.",
+      "sizes": ["S/M", "L/XL"],
+      "in_stock": true
+    }
+  ]
+}

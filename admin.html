@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Управление товарами — ATLETT</title>
+<link rel="icon" href="assets/logo.png">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="index.html" class="logo-link">
+      <img src="assets/logo.png" alt="ATLETT">
+      <span class="logo-text">ATLETT<span>.</span></span>
+    </a>
+    <nav class="main-nav">
+      <a href="index.html">На сайт</a>
+      <a href="catalog.html">Каталог</a>
+    </nav>
+    <div class="header-actions"></div>
+  </div>
+</header>
+
+<div class="admin-shell">
+  <div class="admin-header">
+    <h1>Товары</h1>
+    <button class="btn btn-primary" id="add-btn">+ Добавить товар</button>
+  </div>
+
+  <div class="admin-banner">
+    Здесь вы редактируете каталог. Изменения сохраняются в файл <b>data/products.json</b>.<br>
+    1. Внесите изменения ниже → 2. нажмите <b>«Скачать products.json»</b> → 3. загрузите скачанный файл на хостинг, заменив старый <b>data/products.json</b> (через файловый менеджер хостинга или FTP).<br>
+    Фото можно загрузить прямо с телефона или компьютера — они встраиваются в файл автоматически.
+  </div>
+
+  <div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:32px;">
+    <button class="btn btn-outline" id="download-btn">⬇ Скачать products.json</button>
+    <label class="btn btn-outline" style="cursor:pointer;">
+      ⬆ Загрузить свой products.json
+      <input type="file" id="upload-json" accept="application/json" style="display:none;">
+    </label>
+  </div>
+
+  <div class="admin-list" id="admin-list"></div>
+
+  <div class="admin-form" id="admin-form">
+    <h3 id="form-title">Новый товар</h3>
+    <form id="product-form">
+      <input type="hidden" id="f-id">
+      <div class="form-row">
+        <div class="form-field">
+          <label>Название товара</label>
+          <input type="text" id="f-name" required placeholder="Бутсы ATLETT Strike FG">
+        </div>
+        <div class="form-field">
+          <label>Категория</label>
+          <select id="f-category"></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Цена (сум)</label>
+          <input type="number" id="f-price" required placeholder="420000">
+        </div>
+        <div class="form-field">
+          <label>Старая цена (если скидка, необязательно)</label>
+          <input type="number" id="f-old-price" placeholder="520000">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Бейдж (необязательно)</label>
+          <input type="text" id="f-badge" placeholder="Хит / Новинка / Скидка">
+        </div>
+        <div class="form-field">
+          <label>Размеры через запятую (необязательно)</label>
+          <input type="text" id="f-sizes" placeholder="40, 41, 42, 43">
+        </div>
+      </div>
+      <div class="form-field full" style="margin-bottom:18px;">
+        <label>Короткое описание (показывается в каталоге)</label>
+        <input type="text" id="f-short" placeholder="Лёгкие бутсы для игры на натуральном газоне">
+      </div>
+      <div class="form-field full" style="margin-bottom:18px;">
+        <label>Полное описание (показывается на странице товара)</label>
+        <textarea id="f-desc" placeholder="Подробное описание товара…"></textarea>
+      </div>
+      <div class="form-field full" style="margin-bottom:8px;">
+        <label>Фото товара (можно выбрать несколько)</label>
+        <input type="file" id="f-images" accept="image/*" multiple>
+        <div class="file-hint">Первое фото используется как главное. Уже загруженные фото показаны ниже.</div>
+        <div id="f-images-preview" style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;"></div>
+      </div>
+      <div class="form-field full" style="margin-bottom:8px;">
+        <label>
+          <input type="checkbox" id="f-instock" checked style="width:auto; display:inline-block; margin-right:6px;">
+          Есть в наличии
+        </label>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Сохранить товар</button>
+        <button type="button" class="btn btn-outline" id="cancel-btn">Отмена</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="assets/script.js"></script>
+<script>
+let shopData = null;
+let currentImages = [];
+let editingId = null;
+
+const listEl = document.getElementById('admin-list');
+const formEl = document.getElementById('admin-form');
+const formTitle = document.getElementById('form-title');
+const toastEl = document.getElementById('toast');
+
+function showToast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  setTimeout(() => toastEl.classList.remove('show'), 2600);
+}
+
+function renderList(){
+  listEl.innerHTML = shopData.products.map(p => `
+    <div class="admin-row">
+      <img src="${(p.images && p.images[0]) || 'assets/products/placeholder-ball.svg'}" alt="">
+      <div>
+        <div class="name">${p.name}</div>
+        <div class="meta">${formatPrice(p.price)} ${shopData.shop.currency} · ${categoryName(shopData.shop, p.category)}</div>
+      </div>
+      <div class="admin-row-actions">
+        <button class="icon-btn" data-edit="${p.id}">Изменить</button>
+      </div>
+      <div class="admin-row-actions">
+        <button class="icon-btn danger" data-delete="${p.id}">Удалить</button>
+      </div>
+    </div>
+  `).join('') || '<p style="color:var(--muted)">Товаров пока нет. Нажмите «Добавить товар».</p>';
+}
+
+function populateCategorySelect(){
+  const sel = document.getElementById('f-category');
+  sel.innerHTML = shopData.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+}
+
+function openForm(product){
+  formEl.classList.add('open');
+  formTitle.textContent = product ? 'Изменить товар' : 'Новый товар';
+  editingId = product ? product.id : null;
+  document.getElementById('f-id').value = product ? product.id : '';
+  document.getElementById('f-name').value = product ? product.name : '';
+  document.getElementById('f-category').value = product ? product.category : shopData.categories[0].id;
+  document.getElementById('f-price').value = product ? product.price : '';
+  document.getElementById('f-old-price').value = product && product.old_price ? product.old_price : '';
+  document.getElementById('f-badge').value = product ? (product.badge || '') : '';
+  document.getElementById('f-sizes').value = product && product.sizes ? product.sizes.join(', ') : '';
+  document.getElementById('f-short').value = product ? (product.short_description || '') : '';
+  document.getElementById('f-desc').value = product ? (product.description || '') : '';
+  document.getElementById('f-instock').checked = product ? product.in_stock !== false : true;
+  currentImages = product && product.images ? [...product.images] : [];
+  renderImagePreview();
+  formEl.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function closeForm(){
+  formEl.classList.remove('open');
+  document.getElementById('product-form').reset();
+  currentImages = [];
+  editingId = null;
+}
+
+function renderImagePreview(){
+  const box = document.getElementById('f-images-preview');
+  box.innerHTML = currentImages.map((src,i) => `
+    <div style="position:relative;">
+      <img src="${src}" style="width:64px;height:64px;object-fit:cover;border:1px solid var(--line);">
+      <button type="button" data-remove-img="${i}" style="position:absolute; top:-6px; right:-6px; background:var(--red); color:#fff; border:none; width:18px; height:18px; font-size:11px; cursor:pointer;">×</button>
+    </div>
+  `).join('');
+}
+
+function fileToDataURL(file){
+  return new Promise((resolve,reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+function slugify(name){
+  return 'p' + Date.now().toString(36) + Math.floor(Math.random()*1000);
+}
+
+(async function init(){
+  shopData = await loadShopData();
+  renderHeaderFooter(shopData.shop, 'admin.html');
+  populateCategorySelect();
+  renderList();
+})();
+
+document.getElementById('add-btn').addEventListener('click', () => openForm(null));
+document.getElementById('cancel-btn').addEventListener('click', closeForm);
+
+listEl.addEventListener('click', (e) => {
+  const editId = e.target.dataset.edit;
+  const delId = e.target.dataset.delete;
+  if(editId){
+    const p = shopData.products.find(x => x.id === editId);
+    openForm(p);
+  }
+  if(delId){
+    if(confirm('Удалить этот товар из каталога?')){
+      shopData.products = shopData.products.filter(x => x.id !== delId);
+      renderList();
+      showToast('Товар удалён. Не забудьте скачать обновлённый файл.');
+    }
+  }
+});
+
+document.getElementById('f-images').addEventListener('change', async (e) => {
+  const files = Array.from(e.target.files);
+  for(const f of files){
+    const dataUrl = await fileToDataURL(f);
+    currentImages.push(dataUrl);
+  }
+  renderImagePreview();
+  e.target.value = '';
+});
+
+document.getElementById('f-images-preview').addEventListener('click', (e) => {
+  const idx = e.target.dataset.removeImg;
+  if(idx !== undefined){
+    currentImages.splice(Number(idx), 1);
+    renderImagePreview();
+  }
+});
+
+document.getElementById('product-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const sizesRaw = document.getElementById('f-sizes').value.trim();
+  const sizes = sizesRaw ? sizesRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+  const product = {
+    id: editingId || slugify(document.getElementById('f-name').value),
+    name: document.getElementById('f-name').value.trim(),
+    category: document.getElementById('f-category').value,
+    price: Number(document.getElementById('f-price').value) || 0,
+    old_price: Number(document.getElementById('f-old-price').value) || 0,
+    badge: document.getElementById('f-badge').value.trim(),
+    images: currentImages.length ? currentImages : ['assets/products/placeholder-ball.svg'],
+    video: '',
+    short_description: document.getElementById('f-short').value.trim(),
+    description: document.getElementById('f-desc').value.trim(),
+    sizes: sizes,
+    in_stock: document.getElementById('f-instock').checked
+  };
+
+  if(editingId){
+    const idx = shopData.products.findIndex(x => x.id === editingId);
+    shopData.products[idx] = product;
+  } else {
+    shopData.products.push(product);
+  }
+  renderList();
+  closeForm();
+  showToast('Товар сохранён. Скачайте products.json, чтобы применить изменения на сайте.');
+});
+
+document.getElementById('download-btn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(shopData, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'products.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Файл скачан. Загрузите его в data/products.json на хостинге.');
+});
+
+document.getElementById('upload-json').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  try{
+    const text = await file.text();
+    const parsed = JSON.parse(text);
+    if(!parsed.products || !parsed.shop) throw new Error('bad format');
+    shopData = parsed;
+    populateCategorySelect();
+    renderList();
+    showToast('Файл загружен. Проверьте товары и при необходимости скачайте снова.');
+  }catch(err){
+    alert('Не удалось прочитать файл. Убедитесь, что это правильный products.json.');
+  }
+  e.target.value = '';
+});
+</script>
+</body>
+</html>
